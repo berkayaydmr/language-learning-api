@@ -46,11 +46,20 @@
     ]
     ```
 
-- **Error Response:**
-  - **Status Code:** `500 Internal Server Error`
-  - **Content:**
-    ```json
-    {
-        "error": "..."
-    }
-    ```
+- **Error Responses:**
+  - **Not Found Error:**
+    - **Status Code:** `404 Not Found`
+    - **Content:**
+      ```json
+      {
+          "error": "No word found."
+      }
+      ```
+  - **Internal Server Error:**
+    - **Status Code:** `500 Internal Server Error`
+    - **Content:**
+      ```json
+      {
+          "error": "Failed to list words."
+      }
+      ```
