@@ -159,16 +159,7 @@ func (s *storage) Create(ctx context.Context, word Word) (*PrimaryKey, error) {
 }
 
 func (s *storage) Update(ctx context.Context, id PrimaryKey, update Update) error {
-	res, err := s.db.ExecContext(ctx, updateWordQuery, update.Word, update.Language, update.Translation, update.ExampleSentence, id)
-
-	r, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if r == 0 {
-		return customerr.ErrWordIDNotFound
-	}
+	_, err := s.db.ExecContext(ctx, updateWordQuery, update.Word, update.Language, update.Translation, update.ExampleSentence, id)
 
 	return err
 }

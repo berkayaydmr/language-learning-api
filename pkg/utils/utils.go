@@ -22,7 +22,7 @@ func ParseStrToInt(str string) (int, error) {
 }
 
 func GetUrlParam(r *http.Request, key UrlParamKey) (*string, error) {
-	value := r.FormValue(key.String())
+	value := r.PathValue(key.String())
 	if value == "" {
 		return nil, customerr.ErrInvalidParameter
 	}

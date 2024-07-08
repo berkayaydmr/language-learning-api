@@ -12,12 +12,12 @@ var (
 )
 
 type ErrorResponse struct {
-	Message string `json:"message"`
+	Error string `json:"error"`
 }
 
 func NewErrorResponse(err error) (ErrorResponse, int) {
 	resp := ErrorResponse{
-		Message: err.Error(),
+		Error: err.Error(),
 	}
 
 	code := 500

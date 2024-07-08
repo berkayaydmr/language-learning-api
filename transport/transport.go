@@ -19,7 +19,7 @@ func MakeHTTPHandler(logger *slog.Logger, storages storage.Storage, authMiddlewa
 	handler.Handle("GET /words", makeListHandler(logger, storages))
 	handler.Handle("POST /words", authMiddleware(makeCreateHandler(logger, storages)))
 	handler.Handle("PATCH /words/{id}", authMiddleware(makeUpdateHandler(logger, storages)))
-	handler.Handle("DELETE /words", authMiddleware(makeDeleteHandler(logger, storages)))
+	handler.Handle("DELETE /words/{id}", authMiddleware(makeDeleteHandler(logger, storages)))
 
 	return handler
 }
