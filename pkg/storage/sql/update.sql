@@ -1,0 +1,1 @@
+UPDATE words SET word = ?, language = ?, translation = ? , example_sentence = ? WHERE id = ?

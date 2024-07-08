@@ -1,0 +1,1 @@
+SELECT id,word,language,translation,example_sentence FROM words
