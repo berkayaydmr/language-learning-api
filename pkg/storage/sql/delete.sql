@@ -1,1 +1,1 @@
-DELETE FROM words WHERE id = ?
+DELETE FROM words WHERE id = ?;

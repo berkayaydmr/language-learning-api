@@ -1,1 +1,1 @@
-UPDATE words SET word = ?, language = ?, translation = ? , example_sentence = ? WHERE id = ?
+UPDATE words SET {{setclause}} WHERE id = ?;

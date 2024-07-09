@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	customerr "github.com/berkayaydmr/language-learning-api/pkg/error"
+	"github.com/berkayaydmr/language-learning-api/pkg/transport/middleware"
 	"github.com/berkayaydmr/language-learning-api/pkg/utils"
-	"github.com/berkayaydmr/language-learning-api/transport/middleware"
 )
 
 type authMiddleware struct {

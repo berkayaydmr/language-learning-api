@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/berkayaydmr/language-learning-api/pkg/storage"
+	"github.com/berkayaydmr/language-learning-api/pkg/transport/middleware"
 	"github.com/berkayaydmr/language-learning-api/pkg/utils"
-	"github.com/berkayaydmr/language-learning-api/transport/middleware"
 )
 
 func MakeHTTPHandler(logger *slog.Logger, storages storage.Storage, authMiddleware middleware.Middleware) http.Handler {
@@ -102,7 +103,7 @@ func makeUpdateHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 			return
 		}
 
-		id, err := utils.ParseStrToInt(*idStr)
+		id, err := strconv.Atoi(*idStr)
 		if err != nil {
 			logger.Error(err.Error())
 			utils.RespondWithError(w, err)
@@ -132,7 +133,7 @@ func makeDeleteHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 			return
 		}
 
-		id, err := utils.ParseStrToInt(*idStr)
+		id, err := strconv.Atoi(*idStr)
 		if err != nil {
 			logger.Error(err.Error())
 			utils.RespondWithError(w, err)

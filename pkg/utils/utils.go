@@ -2,7 +2,6 @@ package utils
 
 import (
 	"net/http"
-	"strconv"
 
 	customerr "github.com/berkayaydmr/language-learning-api/pkg/error"
 )
@@ -15,10 +14,6 @@ const (
 
 func (k UrlParamKey) String() string {
 	return string(k)
-}
-
-func ParseStrToInt(str string) (int, error) {
-	return strconv.Atoi(str)
 }
 
 func GetUrlParam(r *http.Request, key UrlParamKey) (*string, error) {

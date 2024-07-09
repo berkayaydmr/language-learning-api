@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"strings"
 
 	customerr "github.com/berkayaydmr/language-learning-api/pkg/error"
 	"modernc.org/sqlite"
@@ -18,16 +19,19 @@ var (
 	seedDataQuery string
 
 	//go:embed sql/list.sql
-	listWordsQuery string
+	listQuery string
 
 	//go:embed sql/create.sql
-	createWordQuery string
+	createQuery string // createQuery
 
 	//go:embed sql/update.sql
-	updateWordQuery string
+	updateQuery string
 
 	//go:embed sql/delete.sql
-	deleteWordQuery string
+	deleteQuery string
+
+	//go:embed sql/if_exist.sql
+	ifExistQuery string
 )
 
 type PrimaryKey int64
@@ -40,12 +44,7 @@ type Word struct {
 	ExampleSentence string     `json:"exampleSentence"`
 }
 
-func (w *Word) Scan(query *sql.Rows) error {
-	return query.Scan(&w.ID, &w.Word, &w.Translation, &w.Language, &w.ExampleSentence)
-}
-
 type Update struct {
-	Word            *string `json:"word"`
 	Translation     *string `json:"translation"`
 	Language        *string `json:"language"`
 	ExampleSentence *string `json:"exampleSentence"`
@@ -58,7 +57,7 @@ type Storage interface {
 	SeedData(ctx context.Context) error
 
 	List(ctx context.Context) ([]Word, error)
-	Create(ctx context.Context, word Word) (*PrimaryKey, error)
+	Create(ctx context.Context, word Word) (PrimaryKey, error)
 	Update(ctx context.Context, id PrimaryKey, update Update) error
 	Delete(ctx context.Context, id PrimaryKey) error
 }
@@ -87,16 +86,6 @@ func (s *storage) Close() error {
 
 func (s *storage) CreateTables(ctx context.Context) error {
 	_, err := s.db.Exec(createTablesQuery)
-
-	if err != nil {
-		if liteErr, ok := err.(*sqlite.Error); ok {
-			// TODO: find table exist error code
-			if liteErr.Code() == sqlite3.P4_TABLE {
-				return nil
-			}
-		}
-	}
-
 	return err
 }
 
@@ -111,7 +100,7 @@ func (s *storage) SeedData(ctx context.Context) error {
 		return err
 	}
 
-	if count < 0 {
+	if count == 0 {
 		return customerr.ErrNoneOfSeedDataInserted
 	}
 
@@ -119,20 +108,20 @@ func (s *storage) SeedData(ctx context.Context) error {
 }
 
 func (s *storage) List(ctx context.Context) ([]Word, error) {
-	rows, err := s.db.QueryContext(ctx, listWordsQuery)
+	rows, err := s.db.QueryContext(ctx, listQuery)
 	if err != nil {
 		return nil, err
 	}
 
-	words := []Word{}
+	var words []Word
 	for rows.Next() {
-		w := Word{}
-		err = w.Scan(rows)
+		var word Word
+		err = rows.Scan(&word.ID, &word.Word, &word.Translation, &word.Language, &word.ExampleSentence)
 		if err != nil {
 			return nil, err
 		}
 
-		words = append(words, w)
+		words = append(words, word)
 	}
 
 	if len(words) == 0 {
@@ -142,30 +131,70 @@ func (s *storage) List(ctx context.Context) ([]Word, error) {
 	return words, nil
 }
 
-func (s *storage) Create(ctx context.Context, word Word) (*PrimaryKey, error) {
-	res, err := s.db.ExecContext(ctx, createWordQuery, word.Word, word.Translation, word.Language, word.ExampleSentence)
+func (s *storage) Create(ctx context.Context, word Word) (PrimaryKey, error) {
+	res, err := s.db.ExecContext(ctx, createQuery, word.Word, word.Translation, word.Language, word.ExampleSentence)
 	if err != nil {
 		if liteErr, ok := err.(*sqlite.Error); ok {
 			if liteErr.Code() == sqlite3.P5_ConstraintUnique {
-				return nil, customerr.ErrWordAlreadyExist
+				return 0, customerr.ErrWordAlreadyExist
 			}
 		}
-		return nil, err
+		return 0, err
 	}
 
 	id, err := res.LastInsertId()
-	primaryKeyId := PrimaryKey(id)
-	return &primaryKeyId, err
+	if err != nil {
+		return 0, err
+	}
+
+	return PrimaryKey(id), err
 }
 
 func (s *storage) Update(ctx context.Context, id PrimaryKey, update Update) error {
-	_, err := s.db.ExecContext(ctx, updateWordQuery, update.Word, update.Language, update.Translation, update.ExampleSentence, id)
+	res, err := s.db.ExecContext(ctx, ifExistQuery, id)
+	if err != nil {
+		return err
+	}
+
+	rc, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rc == 0 {
+		return customerr.ErrWordIDNotFound
+	}
+
+	var builder strings.Builder
+
+	if update.Translation != nil {
+		builder.WriteString("translation = ? ")
+	}
+
+	if update.Language != nil {
+		if builder.Len() > 0 {
+			builder.WriteString(", ")
+		}
+		builder.WriteString("language = ? ")
+	}
+
+	if update.ExampleSentence != nil {
+		if builder.Len() > 0 {
+			builder.WriteString(", ")
+		}
+		builder.WriteString("example_sentence = ? ")
+	}
+
+	_, err = s.db.ExecContext(ctx, strings.Replace(updateQuery, "{{setclause}}", builder.String(), 1), id)
+	if err != nil {
+		return err
+	}
 
 	return err
 }
 
 func (s *storage) Delete(ctx context.Context, id PrimaryKey) error {
-	res, err := s.db.ExecContext(ctx, deleteWordQuery)
+	res, err := s.db.ExecContext(ctx, deleteQuery)
 	if err != nil {
 		return err
 	}

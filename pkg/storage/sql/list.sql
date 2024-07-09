@@ -1,1 +1,1 @@
-SELECT id,word,language,translation,example_sentence FROM words
+SELECT id,word,language,translation,example_sentence FROM words; // order by ekle

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/berkayaydmr/language-learning-api/common"
 	"github.com/berkayaydmr/language-learning-api/pkg/storage"
 )
 
@@ -17,7 +16,7 @@ func main() {
 
 	storage := storage.New()
 
-	err := storage.Open(context, common.DSN)
+	err := storage.Open(context,"../../words.db")
 	if err != nil {
 		panic(err)
 	}

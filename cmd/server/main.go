@@ -4,11 +4,11 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"time"
 
-	"github.com/berkayaydmr/language-learning-api/common"
 	"github.com/berkayaydmr/language-learning-api/pkg/storage"
-	"github.com/berkayaydmr/language-learning-api/transport"
-	"github.com/berkayaydmr/language-learning-api/transport/middleware/authmiddleware"
+	"github.com/berkayaydmr/language-learning-api/pkg/transport"
+	"github.com/berkayaydmr/language-learning-api/pkg/transport/middleware/authmiddleware"
 )
 
 func main() {
@@ -17,11 +17,11 @@ func main() {
 	// http server olusturulacak
 	// http server baslatilacak
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 
 	storage := storage.New()
-	err := storage.Open(ctx, common.DSN)
+	err := storage.Open(ctx, "../../words.db")
 	if err != nil {
 		panic(err)
 	}
