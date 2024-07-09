@@ -112,7 +112,7 @@ func makeUpdateHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 
 		context, cancel := context.WithTimeout(context.Background(), time.Minute*2)
 		defer cancel()
-
+		
 		err = storages.Update(context, storage.PrimaryKey(id), request)
 		if err != nil {
 			logger.Error(err.Error())

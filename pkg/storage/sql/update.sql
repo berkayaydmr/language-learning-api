@@ -1,1 +1,1 @@
-UPDATE words SET {{setclause}} WHERE id = ?;
+UPDATE words SET {setclause} WHERE id = ?;

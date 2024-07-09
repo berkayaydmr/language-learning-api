@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"fmt"
 	"strings"
 
 	customerr "github.com/berkayaydmr/language-learning-api/pkg/error"
+
 	"modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
 )
@@ -151,45 +153,39 @@ func (s *storage) Create(ctx context.Context, word Word) (PrimaryKey, error) {
 }
 
 func (s *storage) Update(ctx context.Context, id PrimaryKey, update Update) error {
-	res, err := s.db.ExecContext(ctx, ifExistQuery, id)
+	row := s.db.QueryRowContext(ctx, ifExistQuery, id)
+
+	var exist bool
+	err := row.Scan(&exist)
 	if err != nil {
 		return err
 	}
 
-	rc, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rc == 0 {
+	if !exist {
 		return customerr.ErrWordIDNotFound
 	}
 
 	var builder strings.Builder
 
 	if update.Translation != nil {
-		builder.WriteString("translation = ? ")
+		builder.WriteString(fmt.Sprintf("translation = '%s'", *update.Translation))
 	}
 
 	if update.Language != nil {
 		if builder.Len() > 0 {
 			builder.WriteString(", ")
 		}
-		builder.WriteString("language = ? ")
+		builder.WriteString(fmt.Sprintf("language = '%s'", *update.Language))
 	}
 
 	if update.ExampleSentence != nil {
 		if builder.Len() > 0 {
 			builder.WriteString(", ")
 		}
-		builder.WriteString("example_sentence = ? ")
+		builder.WriteString(fmt.Sprintf("example_sentence = '%s'", *update.ExampleSentence))
 	}
 
-	_, err = s.db.ExecContext(ctx, strings.Replace(updateQuery, "{{setclause}}", builder.String(), 1), id)
-	if err != nil {
-		return err
-	}
-
+	_, err = s.db.ExecContext(ctx, strings.Replace(updateQuery, "{setclause}", builder.String(), 1), id)
 	return err
 }
 
