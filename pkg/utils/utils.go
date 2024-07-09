@@ -16,11 +16,11 @@ func (k UrlParamKey) String() string {
 	return string(k)
 }
 
-func GetUrlParam(r *http.Request, key UrlParamKey) (*string, error) {
+func GetUrlParam(r *http.Request, key UrlParamKey) (string, error) {
 	value := r.PathValue(key.String())
 	if value == "" {
-		return nil, customerr.ErrInvalidParameter
+		return "", customerr.ErrInvalidParameter
 	}
 
-	return &value, nil
+	return value, nil
 }

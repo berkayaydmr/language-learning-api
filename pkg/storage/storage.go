@@ -118,11 +118,12 @@ func (s *storage) List(ctx context.Context) ([]Word, error) {
 	var words []Word
 	for rows.Next() {
 		var word Word
-		err = rows.Scan(&word.ID, &word.Word, &word.Translation, &word.Language, &word.ExampleSentence)
+		exampleSentence := sql.NullString{}
+		err = rows.Scan(&word.ID, &word.Word, &word.Translation, &word.Language, &exampleSentence)
 		if err != nil {
 			return nil, err
 		}
-
+		word.ExampleSentence = exampleSentence.String
 		words = append(words, word)
 	}
 

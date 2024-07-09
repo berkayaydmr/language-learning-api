@@ -14,7 +14,7 @@ func RespondWithError(w http.ResponseWriter, err error) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-func RespondWithJSON(w http.ResponseWriter, data interface{}, code int) {
+func Respond(w http.ResponseWriter, data interface{}, code int) {
 	resp, err := json.Marshal(data)
 	if err != nil {
 		RespondWithError(w, err)

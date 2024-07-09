@@ -3,5 +3,5 @@ CREATE TABLE IF NOT EXISTS words(
     word TEXT NOT NULL UNIQUE,
     language TEXT NOT NULL,
     translation TEXT NOT NULL,
-    example_sentence TEXT NOT NULL // null olsun
+    example_sentence TEXT
 );

@@ -33,7 +33,6 @@ func makeHealthCheckHandler(logger *slog.Logger) http.Handler {
 
 func makeListHandler(logger *slog.Logger, storages storage.Storage) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger.Info("List Handler Called")
 		context, cancel := context.WithTimeout(context.Background(), time.Minute*2)
 		defer cancel()
 
@@ -44,14 +43,14 @@ func makeListHandler(logger *slog.Logger, storages storage.Storage) http.Handler
 			return
 		}
 
-		utils.RespondWithJSON(w, words, http.StatusOK)
+		utils.Respond(w, words, http.StatusOK)
 	})
 }
 
 type Create struct {
-	Word            string `json:"word"`
-	Translation     string `json:"translation"`
-	Language        string `json:"language"`
+	Word            string  `json:"word"`
+	Translation     string  `json:"translation"`
+	Language        string  `json:"language"`
 	ExampleSentence string `json:"exampleSentence"`
 }
 
@@ -82,7 +81,7 @@ func makeCreateHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 			return
 		}
 
-		utils.RespondWithJSON(w, map[string]any{"id": &id}, http.StatusCreated)
+		utils.Respond(w, map[string]any{"id": &id}, http.StatusCreated)
 	})
 }
 
@@ -103,7 +102,7 @@ func makeUpdateHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 			return
 		}
 
-		id, err := strconv.Atoi(*idStr)
+		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			logger.Error(err.Error())
 			utils.RespondWithError(w, err)
@@ -112,7 +111,7 @@ func makeUpdateHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 
 		context, cancel := context.WithTimeout(context.Background(), time.Minute*2)
 		defer cancel()
-		
+
 		err = storages.Update(context, storage.PrimaryKey(id), request)
 		if err != nil {
 			logger.Error(err.Error())
@@ -120,7 +119,7 @@ func makeUpdateHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 			return
 		}
 
-		utils.RespondWithJSON(w, nil, http.StatusNoContent)
+		utils.Respond(w, nil, http.StatusNoContent)
 	})
 }
 
@@ -133,7 +132,7 @@ func makeDeleteHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 			return
 		}
 
-		id, err := strconv.Atoi(*idStr)
+		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			logger.Error(err.Error())
 			utils.RespondWithError(w, err)
@@ -150,6 +149,6 @@ func makeDeleteHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 			return
 		}
 
-		utils.RespondWithJSON(w, nil, http.StatusNoContent)
+		utils.Respond(w, nil, http.StatusNoContent)
 	})
 }
