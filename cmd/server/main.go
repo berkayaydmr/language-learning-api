@@ -28,9 +28,11 @@ func main() {
 
 	logger := slog.Default()
 
-	authMiddleware := authmiddleware.NewAuthMiddleware("a", nil)
+	var handler http.Handler
 
-	handler := transport.MakeHTTPHandler(logger, storage, authMiddleware)
+	authMiddleware := authmiddleware.NewAuthMiddleware("a", handler)
+
+	handler = transport.MakeHTTPHandler(logger, storage, authMiddleware)
 
 	server := &http.Server{
 		Addr:    ":8080",

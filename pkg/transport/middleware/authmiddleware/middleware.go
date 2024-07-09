@@ -20,7 +20,6 @@ func NewAuthMiddleware(apiKey string, next http.Handler) middleware.Middleware {
 			next:   next,
 		}
 	}
-
 }
 
 func (m *authMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {

@@ -51,7 +51,7 @@ type Create struct {
 	Word            string  `json:"word"`
 	Translation     string  `json:"translation"`
 	Language        string  `json:"language"`
-	ExampleSentence string `json:"exampleSentence"`
+	ExampleSentence *string `json:"exampleSentence"`
 }
 
 func makeCreateHandler(logger *slog.Logger, storages storage.Storage) http.Handler {

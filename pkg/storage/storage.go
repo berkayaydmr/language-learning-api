@@ -43,7 +43,7 @@ type Word struct {
 	Word            string     `json:"word"`
 	Translation     string     `json:"translation"`
 	Language        string     `json:"language"`
-	ExampleSentence string     `json:"exampleSentence"`
+	ExampleSentence *string    `json:"exampleSentence"`
 }
 
 type Update struct {
@@ -123,7 +123,7 @@ func (s *storage) List(ctx context.Context) ([]Word, error) {
 		if err != nil {
 			return nil, err
 		}
-		word.ExampleSentence = exampleSentence.String
+		word.ExampleSentence = &exampleSentence.String
 		words = append(words, word)
 	}
 
