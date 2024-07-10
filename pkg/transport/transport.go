@@ -47,16 +47,10 @@ func makeListHandler(logger *slog.Logger, storages storage.Storage) http.Handler
 	})
 }
 
-type Create struct {
-	Word            string  `json:"word"`
-	Translation     string  `json:"translation"`
-	Language        string  `json:"language"`
-	ExampleSentence *string `json:"exampleSentence"`
-}
 
 func makeCreateHandler(logger *slog.Logger, storages storage.Storage) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		request := Create{}
+		var request storage.Word
 		err := json.NewDecoder(r.Body).Decode(&request)
 		if err != nil {
 			logger.Error(err.Error())
@@ -64,17 +58,10 @@ func makeCreateHandler(logger *slog.Logger, storages storage.Storage) http.Handl
 			return
 		}
 
-		word := storage.Word{
-			Word:            request.Word,
-			Translation:     request.Translation,
-			Language:        request.Language,
-			ExampleSentence: request.ExampleSentence,
-		}
-
 		context, cancel := context.WithTimeout(context.Background(), time.Minute*2)
 		defer cancel()
 
-		id, err := storages.Create(context, word)
+		id, err := storages.Create(context, request)
 		if err != nil {
 			logger.Error(err.Error())
 			utils.RespondWithError(w, err)

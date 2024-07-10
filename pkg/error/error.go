@@ -16,9 +16,7 @@ type ErrorResponse struct {
 }
 
 func NewErrorResponse(err error) (ErrorResponse, int) {
-	resp := ErrorResponse{
-		Error: err.Error(),
-	}
+	resp := ErrorResponse{Error: err.Error()}
 
 	code := 500
 	switch err {

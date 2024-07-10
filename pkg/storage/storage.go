@@ -43,7 +43,7 @@ type Word struct {
 	Word            string     `json:"word"`
 	Translation     string     `json:"translation"`
 	Language        string     `json:"language"`
-	ExampleSentence *string    `json:"exampleSentence"`
+	ExampleSentence string     `json:"exampleSentence"`
 }
 
 type Update struct {
@@ -83,6 +83,9 @@ func (s *storage) Open(ctx context.Context, dsn string) error {
 }
 
 func (s *storage) Close() error {
+	if s.db == nil {
+		return nil
+	}
 	return s.db.Close()
 }
 
@@ -92,21 +95,8 @@ func (s *storage) CreateTables(ctx context.Context) error {
 }
 
 func (s *storage) SeedData(ctx context.Context) error {
-	result, err := s.db.ExecContext(ctx, seedDataQuery)
-	if err != nil {
-		return err
-	}
-
-	count, err := result.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	if count == 0 {
-		return customerr.ErrNoneOfSeedDataInserted
-	}
-
-	return nil
+	_, err := s.db.ExecContext(ctx, seedDataQuery)
+	return err
 }
 
 func (s *storage) List(ctx context.Context) ([]Word, error) {
@@ -123,7 +113,7 @@ func (s *storage) List(ctx context.Context) ([]Word, error) {
 		if err != nil {
 			return nil, err
 		}
-		word.ExampleSentence = &exampleSentence.String
+		word.ExampleSentence = exampleSentence.String
 		words = append(words, word)
 	}
 

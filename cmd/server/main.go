@@ -2,8 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/berkayaydmr/language-learning-api/pkg/storage"
@@ -11,37 +15,67 @@ import (
 	"github.com/berkayaydmr/language-learning-api/pkg/transport/middleware/authmiddleware"
 )
 
-func main() {
-	// storage olusturulacak
-	// http handler'lar olusturulacak
-	// http server olusturulacak
-	// http server baslatilacak
+const (
+	dsn    = "words.db"
+	apiKey = "a"
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	addr            = ":8080"
+	readTimeout     = 5 * time.Second
+	writeTimeout    = 10 * time.Second
+	idleTimeout     = 60 * time.Second
+	maxHeaderBytes  = 1 * 1024 * 1024 // 1MB
+	shutdownTimeout = 15 * time.Second
+)
+
+func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGKILL)
 	defer cancel()
 
-	storage := storage.New()
-	err := storage.Open(ctx, "../../words.db")
+	s := storage.New()
+	err := s.Open(ctx, dsn)
 	if err != nil {
-		panic(err)
+		slog.Error("failed to open db", "error", err)
+		return
 	}
 
-	logger := slog.Default()
+	authMiddleware := authmiddleware.NewAuthMiddleware(apiKey)
 
-	var handler http.Handler
-
-	authMiddleware := authmiddleware.NewAuthMiddleware("a", handler)
-
-	handler = transport.MakeHTTPHandler(logger, storage, authMiddleware)
+	handler := transport.MakeHTTPHandler(logger, s, authMiddleware)
 
 	server := &http.Server{
-		Addr:    ":8080",
-		Handler: handler,
+		Addr:           addr,
+		ReadTimeout:    readTimeout,
+		WriteTimeout:   writeTimeout,
+		IdleTimeout:    idleTimeout,
+		MaxHeaderBytes: maxHeaderBytes,
+		Handler:        handler,
 	}
 
-	logger.Info("Server Started Running on :8080")
-	err = server.ListenAndServe()
+	go func() {
+		logger.Info("server is listening", "addr", addr)
+		err := server.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Error("server failed", "error", err)
+			cancel()
+		}
+	}()
+
+	<-ctx.Done()
+	
+	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancelShutdown()
+
+	err = server.Shutdown(ctxShutdown)
 	if err != nil {
-		panic(err)
+		logger.Error("failed to close server", "error", err)
+	}
+
+	err = s.Close()
+	if err != nil {
+		logger.Error("failed to close storage", "error", err)
 	}
 }

@@ -13,7 +13,7 @@ type authMiddleware struct {
 	next   http.Handler
 }
 
-func NewAuthMiddleware(apiKey string, next http.Handler) middleware.Middleware {
+func NewAuthMiddleware(apiKey string) middleware.Middleware {
 	return func(next http.Handler) http.Handler {
 		return &authMiddleware{
 			apiKey: apiKey,
@@ -23,7 +23,7 @@ func NewAuthMiddleware(apiKey string, next http.Handler) middleware.Middleware {
 }
 
 func (m *authMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("x-api-key") != m.apiKey {
+	if r.Header.Get("X-Api-Key") != m.apiKey {
 		utils.RespondWithError(w, customerr.ErrAuthorizationFailed)
 		return
 	}

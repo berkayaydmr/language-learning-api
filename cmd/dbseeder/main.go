@@ -7,16 +7,12 @@ import (
 )
 
 func main() {
-	// storage olusturulacak
-	// storage acilacak
-	// storage tablolari olusturulacak
-	// storage'a veri eklenecek
 	context, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	storage := storage.New()
 
-	err := storage.Open(context,"../../words.db")
+	err := storage.Open(context, "../server/words.db")
 	if err != nil {
 		panic(err)
 	}
