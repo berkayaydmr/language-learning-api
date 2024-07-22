@@ -18,10 +18,8 @@ type ErrorResponse struct {
 func NewErrorResponse(err error) (ErrorResponse, int) {
 	resp := ErrorResponse{Error: err.Error()}
 
-	code := 500
+	var code int
 	switch err {
-	case ErrNoneOfSeedDataInserted:
-		code = 500
 	case ErrWordsNotFound:
 		code = 404
 	case ErrWordAlreadyExist:
@@ -32,6 +30,8 @@ func NewErrorResponse(err error) (ErrorResponse, int) {
 		code = 401
 	case ErrInvalidParameter:
 		code = 400
+	default:
+		code = 500
 	}
 
 	return resp, code

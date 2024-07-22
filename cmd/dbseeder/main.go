@@ -12,7 +12,7 @@ func main() {
 
 	storage := storage.New()
 
-	err := storage.Open(context, "../server/words.db")
+	err := storage.Open(context, "cmd/server/words.db")
 	if err != nil {
 		panic(err)
 	}

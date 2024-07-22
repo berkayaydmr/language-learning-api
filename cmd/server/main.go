@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	dsn    = "words.db"
+	dsn    = "cmd/server/words.db"
 	apiKey = "a"
 
 	addr            = ":8080"
@@ -65,7 +65,7 @@ func main() {
 	}()
 
 	<-ctx.Done()
-	
+
 	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancelShutdown()
 

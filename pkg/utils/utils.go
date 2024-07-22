@@ -3,7 +3,7 @@ package utils
 import (
 	"net/http"
 
-	customerr "github.com/berkayaydmr/language-learning-api/pkg/error"
+	"github.com/berkayaydmr/language-learning-api/pkg/customerr"
 )
 
 type UrlParamKey string

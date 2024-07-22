@@ -47,7 +47,6 @@ func makeListHandler(logger *slog.Logger, storages storage.Storage) http.Handler
 	})
 }
 
-
 func makeCreateHandler(logger *slog.Logger, storages storage.Storage) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var request storage.Word

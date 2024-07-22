@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	customerr "github.com/berkayaydmr/language-learning-api/pkg/error"
+	"github.com/berkayaydmr/language-learning-api/pkg/customerr"
 
 	"modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
@@ -181,9 +181,9 @@ func (s *storage) Update(ctx context.Context, id PrimaryKey, update Update) erro
 }
 
 func (s *storage) Delete(ctx context.Context, id PrimaryKey) error {
-	res, err := s.db.ExecContext(ctx, deleteQuery)
+	res, err := s.db.ExecContext(ctx, deleteQuery, id)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to exec query: %w", err)
 	}
 
 	r, err := res.RowsAffected()

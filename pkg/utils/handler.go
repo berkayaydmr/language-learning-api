@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	customerr "github.com/berkayaydmr/language-learning-api/pkg/error"
+	"github.com/berkayaydmr/language-learning-api/pkg/customerr"
 )
 
 func RespondWithError(w http.ResponseWriter, err error) {
