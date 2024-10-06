@@ -1,0 +1,1 @@
+INSERT INTO words(word,translation,language,example_sentence) VALUES (?,?,?,?);

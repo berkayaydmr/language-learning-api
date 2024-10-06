@@ -1,0 +1,1 @@
+UPDATE words SET {setclause} WHERE id = ?;
